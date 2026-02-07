@@ -7,87 +7,87 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Algorithm Explanation Section -->
-<div class="algo-explanation">
-    <button onclick="toggleAlgoInfo()" class="btn-info">
-        📚 How Does It Work? (Click to Learn)
-    </button>
-    
-    <div id="algoInfo" class="algo-content" style="display:none;">
-        <h3>🧮 Algorithm: Distance Transform Method</h3>
-        
-        <div class="algo-steps">
-            <div class="algo-step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h4>Convert to Raster</h4>
-                    <p>Transform the river polygon into a binary grid where 1 = inside river, 0 = outside</p>
-                </div>
-            </div>
-            
-            <div class="algo-step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h4>Distance Transform</h4>
-                    <p>Calculate the distance from each point to the nearest river boundary. The point with maximum distance = widest part!</p>
-                </div>
-            </div>
-            
-            <div class="algo-step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h4>Optimal Placement</h4>
-                    <p>Place the label at the maximum distance point, ensuring it fits with proper padding</p>
-                </div>
-            </div>
-            
-            <div class="algo-step">
-                <div class="step-number">4</div>
-                <div class="step-content">
-                    <h4>Compare with Naive</h4>
-                    <p>Show side-by-side: Centroid (red) vs Our Method (green)</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="algo-comparison">
-            <h4>Why Better Than Centroid?</h4>
-            <table class="comparison-table">
-                <tr>
-                    <th>Method</th>
-                    <th>Centroid (Naive)</th>
-                    <th>Distance Transform (Ours)</th>
-                </tr>
-                <tr>
-                    <td><strong>Approach</strong></td>
-                    <td>Geometric center only</td>
-                    <td>Considers shape width</td>
-                </tr>
-                <tr>
-                    <td><strong>Edge Safety</strong></td>
-                    <td>❌ Can be near edges</td>
-                    <td>✅ Maximum distance from edges</td>
-                </tr>
-                <tr>
-                    <td><strong>Irregular Shapes</strong></td>
-                    <td>❌ Ignores shape complexity</td>
-                    <td>✅ Adapts to any shape</td>
-                </tr>
-                <tr>
-                    <td><strong>Success Rate</strong></td>
-                    <td>~60-70%</td>
-                    <td>~95%</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
-
     <div class="container">
         <header>
             <h1>🗺️ River Labeling Tool</h1>
             <p>Intelligent cartographic label placement using computational geometry</p>
         </header>
+
+        <!-- Algorithm Explanation Section -->
+        <div class="algo-explanation">
+            <button onclick="toggleAlgoInfo()" class="btn-info">
+                📚 How Does It Work? (Click to Learn)
+            </button>
+            
+            <div id="algoInfo" class="algo-content" style="display:none;">
+                <h3>🧮 Algorithm: Distance Transform Method</h3>
+                
+                <div class="algo-steps">
+                    <div class="algo-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Convert to Raster</h4>
+                            <p>Transform the river polygon into a binary grid where 1 = inside river, 0 = outside</p>
+                        </div>
+                    </div>
+                    
+                    <div class="algo-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Distance Transform</h4>
+                            <p>Calculate the distance from each point to the nearest river boundary. The point with maximum distance = widest part!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="algo-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Optimal Placement</h4>
+                            <p>Place the label at the maximum distance point, ensuring it fits with proper padding</p>
+                        </div>
+                    </div>
+                    
+                    <div class="algo-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Compare with Naive</h4>
+                            <p>Show side-by-side: Centroid (red) vs Our Method (green)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="algo-comparison">
+                    <h4>Why Better Than Centroid?</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Method</th>
+                            <th>Centroid (Naive)</th>
+                            <th>Distance Transform (Ours)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Approach</strong></td>
+                            <td>Geometric center only</td>
+                            <td>Considers shape width</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Edge Safety</strong></td>
+                            <td>❌ Can be near edges</td>
+                            <td>✅ Maximum distance from edges</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Irregular Shapes</strong></td>
+                            <td>❌ Ignores shape complexity</td>
+                            <td>✅ Adapts to any shape</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Success Rate</strong></td>
+                            <td>~60-70%</td>
+                            <td>~95%</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <div class="main-content">
             <!-- Left side: Drawing canvas -->
@@ -98,8 +98,8 @@
                 <canvas id="riverCanvas" width="600" height="500"></canvas>
                 
                 <div class="canvas-controls">
-                    <button onclick="clearCanvas()" class="btn btn-secondary">Clear</button>
-                    <button onclick="closeRiver()" class="btn btn-primary">Close River</button>
+                    <button onclick="clearCanvas()" class="btn btn-secondary" title="Start over with a new river">Clear</button>
+                    <button onclick="closeRiver()" class="btn btn-primary" title="Complete the polygon to enable labeling">Close River</button>
                     <select onchange="loadSampleRiver(this.value)" class="btn-select">
                         <option value="">Load Sample...</option>
                         <option value="elbe">ELBE (Wide River)</option>
@@ -124,18 +124,32 @@
                     <span>pt</span>
                 </div>
                 
-                <button onclick="placeLabel()" class="btn btn-success btn-large" id="placeLabelBtn">
-                    Place Label
-                </button>
+                <!-- Two buttons: Single placement and Algorithm comparison -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                    <button onclick="placeLabel()" class="btn btn-success" id="placeLabelBtn" title="Use our Distance Transform algorithm to place label">
+                        ✓ Place Label
+                    </button>
+                    <button onclick="compareAlgorithms()" class="btn btn-primary" id="compareBtn" title="Compare 3 different algorithms side-by-side" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        ⚡ Compare Algorithms
+                    </button>
+                </div>
                 
                 <div id="loading" class="loading" style="display:none;">
                     <div class="spinner"></div>
-                    <p>Processing...</p>
+                    <p id="loadingText">Processing...</p>
+                    <p id="loadingStep" style="font-size: 14px; color: #666; margin-top: 5px;"></p>
                 </div>
                 
+                <!-- Single algorithm results -->
                 <div id="results" class="results" style="display:none;">
                     <h3>✓ Results</h3>
                     <div id="resultContent"></div>
+                </div>
+
+                <!-- Algorithm comparison results -->
+                <div id="comparisonResults" class="results" style="display:none;">
+                    <h3>🏆 Algorithm Comparison Results</h3>
+                    <div id="comparisonContent"></div>
                 </div>
             </div>
         </div>
@@ -159,6 +173,7 @@
         <footer style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0; color: #666;">
             <p><strong>Algorithm:</strong> Distance Transform + Medial Axis | <strong>Tech:</strong> Python + Flask + Shapely</p>
             <p style="font-size: 14px; margin-top: 10px;">Built for 24-hour Hackathon</p>
+            <p style="font-size: 12px; margin-top: 10px; color: #999;">Shortcuts: [1,2,3] Load samples | [Space] Close | [Enter] Compare | [Esc] Clear</p>
         </footer>
     </div>
 

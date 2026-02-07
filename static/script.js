@@ -102,6 +102,7 @@ function clearCanvas() {
     isRiverClosed = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     document.getElementById('results').style.display = 'none';
+    document.getElementById('comparisonResults').style.display = 'none';
     document.getElementById('visualizationSection').style.display = 'none';
     document.getElementById('labelText').value = 'RIVER';
     document.getElementById('fontSize').value = 24;
@@ -118,7 +119,7 @@ function closeRiver() {
     
     isRiverClosed = true;
     drawRiver();
-    alert('✓ River closed! Now click "Place Label" to see the magic happen.');
+    alert('✓ River closed! Now click "Place Label" or "Compare Algorithms".');
 }
 
 /**
@@ -141,11 +142,12 @@ function loadSampleRiver(riverName) {
     
     // Reset results
     document.getElementById('results').style.display = 'none';
+    document.getElementById('comparisonResults').style.display = 'none';
     document.getElementById('visualizationSection').style.display = 'none';
 }
 
 /**
- * Call backend API to place label
+ * Call backend API to place label (single algorithm)
  */
 async function placeLabel() {
     if (!isRiverClosed) {
@@ -170,9 +172,17 @@ async function placeLabel() {
     
     // Show loading state
     document.getElementById('loading').style.display = 'block';
+    const loadingText = document.getElementById('loadingText');
+    const loadingStep = document.getElementById('loadingStep');
+    if (loadingText) loadingText.textContent = 'Placing label...';
+    if (loadingStep) loadingStep.textContent = '';
     document.getElementById('results').style.display = 'none';
+    document.getElementById('comparisonResults').style.display = 'none';
     document.getElementById('visualizationSection').style.display = 'none';
     document.getElementById('placeLabelBtn').disabled = true;
+    document.getElementById('compareBtn').disabled = true;
+    
+    setTimeout(() => { const s = document.getElementById('loadingStep'); if (s) s.textContent = 'Computing optimal position...'; }, 200);
     
     try {
         // Call API
@@ -196,7 +206,10 @@ async function placeLabel() {
         
         // Hide loading
         document.getElementById('loading').style.display = 'none';
+        const step = document.getElementById('loadingStep');
+        if (step) step.textContent = '';
         document.getElementById('placeLabelBtn').disabled = false;
+        document.getElementById('compareBtn').disabled = false;
         
         if (result.error) {
             alert('❌ Error: ' + result.error);
@@ -208,25 +221,104 @@ async function placeLabel() {
         
     } catch (error) {
         document.getElementById('loading').style.display = 'none';
+        const step = document.getElementById('loadingStep');
+        if (step) step.textContent = '';
         document.getElementById('placeLabelBtn').disabled = false;
+        document.getElementById('compareBtn').disabled = false;
         alert('❌ Error connecting to server: ' + error.message);
         console.error('Error:', error);
     }
 }
 
 /**
- * Display results in the UI
+ * Compare multiple algorithms
+ */
+async function compareAlgorithms() {
+    if (!isRiverClosed) {
+        alert('⚠️ Please close the river first by clicking "Close River"!');
+        return;
+    }
+    
+    const labelText = document.getElementById('labelText').value.trim();
+    const fontSize = parseInt(document.getElementById('fontSize').value);
+    
+    if (!labelText) {
+        alert('⚠️ Please enter a river name!');
+        return;
+    }
+    
+    if (fontSize < 12 || fontSize > 48) {
+        alert('⚠️ Font size must be between 12 and 48 pt!');
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('loading').style.display = 'block';
+    const loadingText = document.getElementById('loadingText');
+    const loadingStep = document.getElementById('loadingStep');
+    if (loadingText) loadingText.textContent = 'Analyzing river geometry...';
+    if (loadingStep) loadingStep.textContent = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('comparisonResults').style.display = 'none';
+    document.getElementById('visualizationSection').style.display = 'none';
+    document.getElementById('compareBtn').disabled = true;
+    document.getElementById('placeLabelBtn').disabled = true;
+    
+    // Simulate progress steps
+    setTimeout(() => { const s = document.getElementById('loadingStep'); if (s) s.textContent = 'Step 1/3: Computing distance transform...'; }, 100);
+    setTimeout(() => { const s = document.getElementById('loadingStep'); if (s) s.textContent = 'Step 2/3: Finding optimal positions...'; }, 300);
+    setTimeout(() => { const s = document.getElementById('loadingStep'); if (s) s.textContent = 'Step 3/3: Comparing algorithms...'; }, 600);
+    
+    try {
+        const response = await fetch('/api/compare-algorithms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                coordinates: points,
+                label_text: labelText,
+                font_size: fontSize
+            })
+        });
+        
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.error || `Server error: ${response.status}`);
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        const step = document.getElementById('loadingStep');
+        if (step) step.textContent = '';
+        document.getElementById('compareBtn').disabled = false;
+        document.getElementById('placeLabelBtn').disabled = false;
+        
+        if (result.error) {
+            alert('❌ Error: ' + result.error);
+            return;
+        }
+        
+        displayComparisonResults(result);
+        
+    } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        const step = document.getElementById('loadingStep');
+        if (step) step.textContent = '';
+        document.getElementById('compareBtn').disabled = false;
+        document.getElementById('placeLabelBtn').disabled = false;
+        alert('❌ Error: ' + error.message);
+        console.error('Error:', error);
+    }
+}
+
+/**
+ * Display single algorithm results
  * @param {Object} result - API response data
  */
 function displayResults(result) {
     // Show results section
     const resultsDiv = document.getElementById('results');
     resultsDiv.style.display = 'block';
-    
-    // Calculate improvement percentage
-    const improvementPercent = result.improvement > 0 
-        ? ((result.improvement / Math.max(result.optimal_x, result.optimal_y)) * 100).toFixed(1)
-        : 0;
     
     // Create metrics HTML
     const html = `
@@ -259,9 +351,76 @@ function displayResults(result) {
     // Show visualization image
     if (result.image) {
         document.getElementById('visualizationSection').style.display = 'block';
+        document.getElementById('visualizationSection').querySelector('h2').textContent = 
+            '3. Comparison: Naive vs Optimal';
         document.getElementById('resultImage').src = 'data:image/png;base64,' + result.image;
         
         // Scroll to results
+        document.getElementById('visualizationSection').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
+}
+
+/**
+ * Display algorithm comparison results
+ */
+function displayComparisonResults(result) {
+    const resultsDiv = document.getElementById('comparisonResults');
+    resultsDiv.style.display = 'block';
+    
+    // Create comparison table
+    const html = `
+        <table class="comparison-results-table">
+            <thead>
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Method</th>
+                    <th>Distance to Edge</th>
+                    <th>Winner?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="${result.winner === 'centroid' ? 'winner-row' : ''}">
+                    <td><strong>Centroid (Naive)</strong></td>
+                    <td>${result.centroid.method}</td>
+                    <td>${result.centroid.distance_to_edge.toFixed(1)} pt</td>
+                    <td>${result.winner === 'centroid' ? '⭐ Winner' : ''}</td>
+                </tr>
+                <tr class="${result.winner === 'distance_transform' ? 'winner-row' : ''}">
+                    <td><strong>Distance Transform (Ours)</strong></td>
+                    <td>${result.distance_transform.method}</td>
+                    <td>${result.distance_transform.distance_to_edge.toFixed(1)} pt</td>
+                    <td>${result.winner === 'distance_transform' ? '⭐ Winner' : ''}</td>
+                </tr>
+                <tr class="${result.winner === 'weighted' ? 'winner-row' : ''}">
+                    <td><strong>Weighted Centroid</strong></td>
+                    <td>${result.weighted.method}</td>
+                    <td>${result.weighted.distance_to_edge.toFixed(1)} pt</td>
+                    <td>${result.winner === 'weighted' ? '⭐ Winner' : ''}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="winner-announcement">
+            <h4>🏆 Winner: ${result[result.winner].name}</h4>
+            <p>Maximum distance from edges = Safest placement!</p>
+        </div>
+    `;
+    
+    document.getElementById('comparisonContent').innerHTML = html;
+    
+    // Confetti celebration after results show
+    setTimeout(celebrateSuccess, 500);
+    
+    // Show comparison image
+    if (result.comparison_image) {
+        document.getElementById('visualizationSection').style.display = 'block';
+        document.getElementById('visualizationSection').querySelector('h2').textContent = 
+            '3. Visual Comparison: All 3 Algorithms';
+        document.getElementById('resultImage').src = 'data:image/png;base64,' + result.comparison_image;
+        
         document.getElementById('visualizationSection').scrollIntoView({ 
             behavior: 'smooth', 
             block: 'start' 
@@ -289,16 +448,8 @@ function downloadImage() {
 }
 
 /**
- * Initialize the app
+ * Toggle algorithm explanation
  */
-function init() {
-    console.log('🗺️ River Labeling Tool initialized');
-    console.log('Ready to draw rivers!');
-}
-
-// Run initialization when page loads
-window.addEventListener('load', init);
-// Toggle algorithm explanation
 function toggleAlgoInfo() {
     const algoInfo = document.getElementById('algoInfo');
     const btn = event.target;
@@ -312,3 +463,82 @@ function toggleAlgoInfo() {
         btn.textContent = '📚 How Does It Work? (Click to Learn)';
     }
 }
+
+/**
+ * Initialize the app
+ */
+function init() {
+    console.log('🗺️ River Labeling Tool initialized');
+    console.log('Ready to draw rivers!');
+}
+
+// Run initialization when page loads
+window.addEventListener('load', init);
+
+// ========== Success Animation ==========
+function celebrateSuccess() {
+    const colors = ['#667eea', '#28a745', '#ffc107', '#17a2b8'];
+    
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            createConfetti();
+        }, i * 30);
+    }
+}
+
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.style.position = 'fixed';
+    confetti.style.width = '10px';
+    confetti.style.height = '10px';
+    confetti.style.backgroundColor = ['#667eea', '#28a745', '#ffc107'][Math.floor(Math.random() * 3)];
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.top = '-10px';
+    confetti.style.borderRadius = '50%';
+    confetti.style.pointerEvents = 'none';
+    confetti.style.zIndex = '9999';
+    confetti.style.opacity = '0.8';
+    
+    document.body.appendChild(confetti);
+    
+    const fallDuration = 2000 + Math.random() * 1000;
+    const endLeft = parseFloat(confetti.style.left) + (Math.random() - 0.5) * 100;
+    
+    confetti.animate([
+        { top: '-10px', left: confetti.style.left },
+        { top: '100vh', left: endLeft + '%', opacity: 0 }
+    ], {
+        duration: fallDuration,
+        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    });
+    
+    setTimeout(() => confetti.remove(), fallDuration);
+}
+
+// ========== Keyboard Shortcuts ==========
+document.addEventListener('keydown', (e) => {
+    const inInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+    
+    // Space = Close River (skip when typing)
+    if (!inInput && e.code === 'Space' && !isRiverClosed && points.length >= 3) {
+        e.preventDefault();
+        closeRiver();
+    }
+    
+    // Enter = Compare Algorithms (skip when typing)
+    if (!inInput && e.code === 'Enter' && isRiverClosed) {
+        e.preventDefault();
+        compareAlgorithms();
+    }
+    
+    // Escape = Clear
+    if (e.code === 'Escape') {
+        e.preventDefault();
+        clearCanvas();
+    }
+    
+    // Numbers 1-3 = Load samples (skip when typing)
+    if (!inInput && e.code === 'Digit1') loadSampleRiver('elbe');
+    if (!inInput && e.code === 'Digit2') loadSampleRiver('rhine');
+    if (!inInput && e.code === 'Digit3') loadSampleRiver('danube');
+});

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="500" viewBox="0 0 600 500">
+  <!-- Light terrain background -->
+  <rect fill="#d4e8d4" width="600" height="500"/>
+  
+  <!-- Subtle contour lines -->
+  <g stroke="#d0e8d0" stroke-width="0.5" fill="none" opacity="0.4">
+    <path d="M0,50 Q150,55 300,50 T600,50"/>
+    <path d="M0,100 Q150,95 300,100 T600,100"/>
+    <path d="M0,150 Q150,155 300,150 T600,150"/>
+    <path d="M0,200 Q150,195 300,200 T600,200"/>
+    <path d="M0,250 Q150,255 300,250 T600,250"/>
+    <path d="M0,300 Q150,295 300,300 T600,300"/>
+    <path d="M0,350 Q150,355 300,350 T600,350"/>
+    <path d="M0,400 Q150,395 300,400 T600,400"/>
+    <path d="M0,450 Q150,455 300,450 T600,450"/>
+  </g>
+  
+  <!-- Grid lines (map coordinates) - more visible -->
+  <g stroke="#c0d8c0" stroke-width="1" opacity="0.6">
+    <line x1="0" y1="0" x2="600" y2="0"/>
+    <line x1="0" y1="100" x2="600" y2="100"/>
+    <line x1="0" y1="200" x2="600" y2="200"/>
+    <line x1="0" y1="300" x2="600" y2="300"/>
+    <line x1="0" y1="400" x2="600" y2="400"/>
+    <line x1="0" y1="500" x2="600" y2="500"/>
+    
+    <line x1="0" y1="0" x2="0" y2="500"/>
+    <line x1="150" y1="0" x2="150" y2="500"/>
+    <line x1="300" y1="0" x2="300" y2="500"/>
+    <line x1="450" y1="0" x2="450" y2="500"/>
+    <line x1="600" y1="0" x2="600" y2="500"/>
+  </g>
+  
+  <!-- Coordinate labels - more visible -->
+  <g fill="#666" font-family="Arial" font-size="12" opacity="0.8">
+    <text x="5" y="15">50?N</text>
+    <text x="5" y="115">49?N</text>
+    <text x="5" y="215">48?N</text>
+    <text x="5" y="315">47?N</text>
+    <text x="5" y="415">46?N</text>
+    
+    <text x="140" y="495">10?E</text>
+    <text x="290" y="495">11?E</text>
+    <text x="440" y="495">12?E</text>
+  </g>
+  
+  <!-- Subtle water features in background -->
+  <g fill="#c8dce8" opacity="0.2">
+    <ellipse cx="450" cy="100" rx="40" ry="30"/>
+    <ellipse cx="150" cy="350" rx="35" ry="25"/>
+  </g>
+</svg>

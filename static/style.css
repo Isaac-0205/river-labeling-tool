@@ -204,10 +204,14 @@ header p {
 }
 
 /* Canvas */
+/* Canvas with map background */
 #riverCanvas {
     border: 3px solid #667eea;
     border-radius: 8px;
-    background: #f8f9fa;
+    background-image: url('map-background.svg');
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 0 30px rgba(0,0,0,0.05);
     cursor: crosshair;
     display: block;
     margin-bottom: 15px;
